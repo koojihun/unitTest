@@ -148,10 +148,6 @@ BOOST_AUTO_TEST_CASE(gen_new_product_tests)
 	const Array& params2 = { "1", "true" };
 	Value v2;
 	v2 = set_generate(params2, false);
-	if (v2 == NULL &&){
-
-	}
-	
 }
 
 BOOST_AUTO_TEST_SUITE_END()
