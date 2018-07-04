@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2014 The Bitcoin Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+// «œ¿Ã∑Á
 #include "wallet.h"
 
 #include <set>
@@ -11,6 +11,9 @@
 
 #include <boost/foreach.hpp>
 #include <boost/test/unit_test.hpp>
+#include "json/json_spirit_utils.h"
+#include "json/json_spirit_value.h"
+#include "rpcserver.h"
 
 // how many times to run all the tests to have a chance to catch errors that only show up with particular random shuffles
 #define RUN_TESTS 100
@@ -19,6 +22,7 @@
 // we repeat those tests this many times and only complain if all iterations of the test fail
 #define RANDOM_REPEATS 5
 
+using namespace json_spirit;
 using namespace std;
 
 typedef set<pair<const CWalletTx*,unsigned int> > CoinSet;
@@ -137,4 +141,20 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
 
 	}
 }
+
+BOOST_AUTO_TEST_CASE(gen_new_product_tests)
+{
+	const Array& params1 = { "{°∞ID°±:3,°∞countryCode°±:3,°∞zipCode°±:3}" };
+	Value v1;
+	v1 = gen_new_product(params1, false);
+
+	const Array& params2 = { "1", "true" };
+	Value v2;
+	v2 = set_generate(params2, false);
+	if (v2 == NULL &&){
+
+	}
+	
+}
+
 BOOST_AUTO_TEST_SUITE_END()
