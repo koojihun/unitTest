@@ -258,19 +258,28 @@ SetupDummyInputs(CBasicKeyStore& keystoreRet, CCoinsViewCache& coinsRet)
         key[i].MakeNewKey(i % 2);
         keystoreRet.AddKey(key[i]);
     }
-
+	
     // Create some dummy input transactions
+	// HB modify
     dummyTransactions[0].vout.resize(2);
-    dummyTransactions[0].vout[0].nValue = 11*CENT;
+	CTxInfo tmp1(1, 1, 1);
+	dummyTransactions[0].vout[0].txInfo = tmp1;
+    //dummyTransactions[0].vout[0].nValue = 11*CENT;
     dummyTransactions[0].vout[0].scriptPubKey << ToByteVector(key[0].GetPubKey()) << OP_CHECKSIG;
-    dummyTransactions[0].vout[1].nValue = 50*CENT;
+	CTxInfo tmp2(2, 2, 2);
+	dummyTransactions[0].vout[1].txInfo = tmp2;
+    //dummyTransactions[0].vout[1].nValue = 50*CENT;
     dummyTransactions[0].vout[1].scriptPubKey << ToByteVector(key[1].GetPubKey()) << OP_CHECKSIG;
     coinsRet.ModifyCoins(dummyTransactions[0].GetHash())->FromTx(dummyTransactions[0], 0);
 
     dummyTransactions[1].vout.resize(2);
-    dummyTransactions[1].vout[0].nValue = 21*CENT;
+	CTxInfo tmp3(3, 3, 3);
+	dummyTransactions[1].vout[0].txInfo = tmp3;
+    //dummyTransactions[1].vout[0].nValue = 21*CENT;
     dummyTransactions[1].vout[0].scriptPubKey = GetScriptForDestination(key[2].GetPubKey().GetID());
-    dummyTransactions[1].vout[1].nValue = 22*CENT;
+	CTxInfo tmp4(4, 4, 4);
+	dummyTransactions[1].vout[1].txInfo = tmp4;
+    //dummyTransactions[1].vout[1].nValue = 22*CENT;
     dummyTransactions[1].vout[1].scriptPubKey = GetScriptForDestination(key[3].GetPubKey().GetID());
     coinsRet.ModifyCoins(dummyTransactions[1].GetHash())->FromTx(dummyTransactions[1], 0);
 
@@ -297,10 +306,13 @@ BOOST_AUTO_TEST_CASE(test_Get)
     t1.vin[2].scriptSig << std::vector<unsigned char>(65, 0) << std::vector<unsigned char>(33, 4); // 22 CENT
 
     t1.vout.resize(2);
-    t1.vout[0].nValue = 90*CENT;
+	CTxInfo tmp(1, 1, 1);
+	t1.vout[0].txInfo = tmp;
+    //t1.vout[0].nValue = 90*CENT;
     t1.vout[0].scriptPubKey << OP_1;
 
     BOOST_CHECK(AreInputsStandard(t1, coins));
+
 	///////////////////////////////////////////////////////////////////
 	BOOST_CHECK_EQUAL(t1.vin.size(), 3);
 	for (int cnt = 0; cnt < 3; cnt++) {
@@ -313,7 +325,8 @@ BOOST_AUTO_TEST_CASE(test_Get)
 	}
 	///////////////////////////////////////////////////////////////////
 	
-    
+	BOOST_CHECK_EQUAL(coins.GetValueIn(t1), (50 + 21 + 22)*CENT);
+    //BOOST_CHECK_EQUAL(coins.GetValueIn(t1), (50+21+22)*CENT);
 
     // Adding extra junk to the scriptSig should make it non-standard:
     t1.vin[0].scriptSig << OP_11;
