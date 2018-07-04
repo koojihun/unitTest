@@ -288,19 +288,32 @@ BOOST_AUTO_TEST_CASE(test_Get)
     t1.vin.resize(3);
     t1.vin[0].prevout.hash = dummyTransactions[0].GetHash();
     t1.vin[0].prevout.n = 1;
-    t1.vin[0].scriptSig << std::vector<unsigned char>(65, 0);
+    t1.vin[0].scriptSig << std::vector<unsigned char>(65, 0); // 50 CENT
     t1.vin[1].prevout.hash = dummyTransactions[1].GetHash();
     t1.vin[1].prevout.n = 0;
-    t1.vin[1].scriptSig << std::vector<unsigned char>(65, 0) << std::vector<unsigned char>(33, 4);
+    t1.vin[1].scriptSig << std::vector<unsigned char>(65, 0) << std::vector<unsigned char>(33, 4); // 21 CENT
     t1.vin[2].prevout.hash = dummyTransactions[1].GetHash();
     t1.vin[2].prevout.n = 1;
-    t1.vin[2].scriptSig << std::vector<unsigned char>(65, 0) << std::vector<unsigned char>(33, 4);
+    t1.vin[2].scriptSig << std::vector<unsigned char>(65, 0) << std::vector<unsigned char>(33, 4); // 22 CENT
+
     t1.vout.resize(2);
     t1.vout[0].nValue = 90*CENT;
     t1.vout[0].scriptPubKey << OP_1;
 
     BOOST_CHECK(AreInputsStandard(t1, coins));
-    BOOST_CHECK_EQUAL(coins.GetValueIn(t1), (50+21+22)*CENT);
+	///////////////////////////////////////////////////////////////////
+	BOOST_CHECK_EQUAL(t1.vin.size(), 3);
+	for (int cnt = 0; cnt < 3; cnt++) {
+		int idx = t1.vin[cnt].prevout.n;
+		uint256 hash = t1.vin[cnt].prevout.hash;
+		CTxInfo tmp = (coins.AccessCoins(hash)->vout[idx]).txInfo;
+		BOOST_CHECK_EQUAL(tmp.nID, cnt + 2);
+		BOOST_CHECK_EQUAL(tmp.nCountryCode, cnt + 2);
+		BOOST_CHECK_EQUAL(tmp.nZipCode, cnt + 2);
+	}
+	///////////////////////////////////////////////////////////////////
+	
+    
 
     // Adding extra junk to the scriptSig should make it non-standard:
     t1.vin[0].scriptSig << OP_11;
