@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 The Bitcoin Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-// «œ¿Ã∑Á
 #include "wallet.h"
 
 #include <set>
@@ -134,11 +133,9 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests)
 
 		CTxInfo tmp_2(2, 2, 2);
 		BOOST_CHECK(!wallet.SelectCoinsMinConf(tmp_2, vCoins, setCoinsRet));
+
 		add_prod(2, 2, 2);
 		BOOST_CHECK(wallet.SelectCoinsMinConf(tmp_2, vCoins, setCoinsRet));
-
-
-
 	}
 }
 
