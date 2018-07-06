@@ -102,51 +102,51 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 
     // block sigops > limit: 1000 CHECKMULTISIG + 1
     tx.vin.resize(1);
-    // NOTE: OP_NOP is used to force 20 SigOps for the CHECKMULTISIG
-    tx.vin[0].scriptSig = CScript() << OP_0 << OP_0 << OP_0 << OP_NOP << OP_CHECKMULTISIG << OP_1;
-    tx.vin[0].prevout.hash = txFirst[0]->GetHash();
-    tx.vin[0].prevout.n = 0;
-    tx.vout.resize(1);
-    tx.vout[0].nValue = 5000000000LL;
-    for (unsigned int i = 0; i < 1001; ++i)
-    {
-        tx.vout[0].nValue -= 1000000;
-        hash = tx.GetHash();
-		// Ravic: REPLACED
-        //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
-		mempool.addUnchecked(hash, CTxMemPoolEntry(tx, GetTime(), 111.0, 11));
-        tx.vin[0].prevout.hash = hash;
-    }
-	// Ravic: REPLACED
-    /*BOOST_CHECK(pblocktemplate = CreateNewBlock(scriptPubKey));
-    delete pblocktemplate;*/
-	BOOST_CHECK(pBlock = CreateNewBlock(scriptPubKey));
-	delete pBlock;
-    mempool.clear();
+ //   // note: op_nop is used to force 20 sigops for the checkmultisig
+ //   tx.vin[0].scriptsig = cscript() << op_0 << op_0 << op_0 << op_nop << op_checkmultisig << op_1;
+ //   tx.vin[0].prevout.hash = txfirst[0]->gethash();
+ //   tx.vin[0].prevout.n = 0;
+ //   tx.vout.resize(1);
+ //   tx.vout[0].nvalue = 5000000000ll;
+ //   for (unsigned int i = 0; i < 1001; ++i)
+ //   {
+ //       tx.vout[0].nvalue -= 1000000;
+ //       hash = tx.gethash();
+	//	// ravic: replaced
+ //       //mempool.addunchecked(hash, ctxmempoolentry(tx, 11, gettime(), 111.0, 11));
+	//	mempool.addunchecked(hash, ctxmempoolentry(tx, gettime(), 111.0, 11));
+ //       tx.vin[0].prevout.hash = hash;
+ //   }
+	//// ravic: replaced
+ //   /*boost_check(pblocktemplate = createnewblock(scriptpubkey));
+ //   delete pblocktemplate;*/
+	//boost_check(pblock = createnewblock(scriptpubkey));
+	//delete pblock;
+ //   mempool.clear();
 
-    // block size > limit
-    tx.vin[0].scriptSig = CScript();
-    // 18 * (520char + DROP) + OP_1 = 9433 bytes
-    std::vector<unsigned char> vchData(520);
-    for (unsigned int i = 0; i < 18; ++i)
-        tx.vin[0].scriptSig << vchData << OP_DROP;
-    tx.vin[0].scriptSig << OP_1;
-    tx.vin[0].prevout.hash = txFirst[0]->GetHash();
-    tx.vout[0].nValue = 5000000000LL;
-    for (unsigned int i = 0; i < 128; ++i)
-    {
-        tx.vout[0].nValue -= 10000000;
-        hash = tx.GetHash();
-		// Ravic: REPLACED
-        //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
-		mempool.addUnchecked(hash, CTxMemPoolEntry(tx, GetTime(), 111.0, 11));
-        tx.vin[0].prevout.hash = hash;
-    }
-	// Ravic: REPLACED
-    /*BOOST_CHECK(pblocktemplate = CreateNewBlock(scriptPubKey));
-    delete pblocktemplate;*/
-	BOOST_CHECK(pBlock = CreateNewBlock(scriptPubKey));
-	delete pBlock;
+ //   // block size > limit
+ //   tx.vin[0].scriptSig = CScript();
+ //   // 18 * (520char + DROP) + OP_1 = 9433 bytes
+ //   std::vector<unsigned char> vchData(520);
+ //   for (unsigned int i = 0; i < 18; ++i)
+ //       tx.vin[0].scriptSig << vchData << OP_DROP;
+ //   tx.vin[0].scriptSig << OP_1;
+ //   tx.vin[0].prevout.hash = txFirst[0]->GetHash();
+ //   tx.vout[0].nValue = 5000000000LL;
+ //   for (unsigned int i = 0; i < 128; ++i)
+ //   {
+ //       tx.vout[0].nValue -= 10000000;
+ //       hash = tx.GetHash();
+	//	// Ravic: REPLACED
+ //       //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
+	//	mempool.addUnchecked(hash, CTxMemPoolEntry(tx, GetTime(), 111.0, 11));
+ //       tx.vin[0].prevout.hash = hash;
+ //   }
+	//// Ravic: REPLACED
+ //   /*BOOST_CHECK(pblocktemplate = CreateNewBlock(scriptPubKey));
+ //   delete pblocktemplate;*/
+	//BOOST_CHECK(pBlock = CreateNewBlock(scriptPubKey));
+	//delete pBlock;
     mempool.clear();
 
     // orphan in mempool
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     // child with higher priority than parent
     tx.vin[0].scriptSig = CScript() << OP_1;
     tx.vin[0].prevout.hash = txFirst[1]->GetHash();
-    tx.vout[0].nValue = 4900000000LL;
+	tx.vout[0].txInfo = CTxInfo(1, 1, 1);
     hash = tx.GetHash();
 	// Ravic: REPLACED
     //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx.vin[1].scriptSig = CScript() << OP_1;
     tx.vin[1].prevout.hash = txFirst[0]->GetHash();
     tx.vin[1].prevout.n = 0;
-    tx.vout[0].nValue = 5900000000LL;
+	tx.vout[0].txInfo = CTxInfo(1, 1, 1);
     hash = tx.GetHash();
 	// Ravic: REPLACED
     //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx.vin.resize(1);
     tx.vin[0].prevout.SetNull();
     tx.vin[0].scriptSig = CScript() << OP_0 << OP_1;
-    tx.vout[0].nValue = 0;
+	tx.vout[0].txInfo = CTxInfo(1, 1, 1);
     hash = tx.GetHash();
 	// Ravic: REPLACED
     //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx.vin[0].prevout.hash = txFirst[0]->GetHash();
     tx.vin[0].prevout.n = 0;
     tx.vin[0].scriptSig = CScript() << OP_1;
-    tx.vout[0].nValue = 4900000000LL;
+	tx.vout[0].txInfo = CTxInfo(1, 1, 1);
     script = CScript() << OP_0;
     tx.vout[0].scriptPubKey = GetScriptForDestination(CScriptID(script));
     hash = tx.GetHash();
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 	mempool.addUnchecked(hash, CTxMemPoolEntry(tx, GetTime(), 111.0, 11));
     tx.vin[0].prevout.hash = hash;
     tx.vin[0].scriptSig = CScript() << (std::vector<unsigned char>)script;
-    tx.vout[0].nValue -= 1000000;
+    tx.vout[0].txInfo = CTxInfo(0, 0, 0);
     hash = tx.GetHash();
 	// Ravic: REPLACED
     //mempool.addUnchecked(hash, CTxMemPoolEntry(tx, 11, GetTime(), 111.0, 11));
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     // double spend txn pair in mempool
     tx.vin[0].prevout.hash = txFirst[0]->GetHash();
     tx.vin[0].scriptSig = CScript() << OP_1;
-    tx.vout[0].nValue = 4900000000LL;
+    tx.vout[0].txInfo = CTxInfo(1, 1, 1);
     tx.vout[0].scriptPubKey = CScript() << OP_1;
     hash = tx.GetHash();
 	// Ravic: REPLACED
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx.vin[0].prevout.hash = txFirst[0]->GetHash();
     tx.vin[0].scriptSig = CScript() << OP_1;
     tx.vin[0].nSequence = 0;
-    tx.vout[0].nValue = 4900000000LL;
+	tx.vout[0].txInfo = CTxInfo(5, 5, 5);
     tx.vout[0].scriptPubKey = CScript() << OP_1;
     tx.nLockTime = chainActive.Tip()->nHeight+1;
     hash = tx.GetHash();
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx2.vin[0].scriptSig = CScript() << OP_1;
     tx2.vin[0].nSequence = 0;
     tx2.vout.resize(1);
-    tx2.vout[0].nValue = 4900000000LL;
+	tx2.vout[0].txInfo = CTxInfo(5, 5, 5);
     tx2.vout[0].scriptPubKey = CScript() << OP_1;
     tx2.nLockTime = chainActive.Tip()->GetMedianTimePast()+1;
     hash = tx2.GetHash();

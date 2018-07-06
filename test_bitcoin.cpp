@@ -32,6 +32,9 @@ struct TestingSetup {
     boost::filesystem::path pathTemp;
     boost::thread_group threadGroup;
 
+	CBlockTreeDB* pblocktree;
+	CCoinsViewCache* pcoinsTip;
+
     TestingSetup() {
 		for (int cnt = 0; cnt < 100; cnt++) {
 			CTxInfo tmp(cnt + 1, cnt + 1, cnt + 1);
@@ -46,9 +49,9 @@ struct TestingSetup {
         pathTemp = GetTempPath() / strprintf("test_bitcoin_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
         boost::filesystem::create_directories(pathTemp);
         mapArgs["-datadir"] = pathTemp.string();
-        pblocktree = new CBlockTreeDB(1 << 20, true);
+		pblocktree = new CBlockTreeDB(1 << 20, true);
         pcoinsdbview = new CCoinsViewDB(1 << 23, true);
-        pcoinsTip = new CCoinsViewCache(pcoinsdbview);
+		pcoinsTip = new CCoinsViewCache(pcoinsdbview);
         InitBlockIndex();
 #ifdef ENABLE_WALLET
         bool fFirstRun;
