@@ -28,6 +28,8 @@ using namespace boost::algorithm;
 // In script_tests.cpp
 extern Array read_json(const std::string& jsondata);
 
+extern vector<CTxInfo> test_info_pool;
+
 static std::map<string, unsigned int> mapFlagNames = boost::assign::map_list_of
     (string("NONE"), (unsigned int)SCRIPT_VERIFY_NONE)
     (string("P2SH"), (unsigned int)SCRIPT_VERIFY_P2SH)
@@ -324,9 +326,6 @@ BOOST_AUTO_TEST_CASE(test_Get)
 		BOOST_CHECK_EQUAL(tmp.nZipCode, cnt + 2);
 	}
 	///////////////////////////////////////////////////////////////////
-	
-	BOOST_CHECK_EQUAL(coins.GetValueIn(t1), (50 + 21 + 22)*CENT);
-    //BOOST_CHECK_EQUAL(coins.GetValueIn(t1), (50+21+22)*CENT);
 
     // Adding extra junk to the scriptSig should make it non-standard:
     t1.vin[0].scriptSig << OP_11;
@@ -351,7 +350,7 @@ BOOST_AUTO_TEST_CASE(test_IsStandard)
     t.vin[0].prevout.n = 1;
     t.vin[0].scriptSig << std::vector<unsigned char>(65, 0);
     t.vout.resize(1);
-    t.vout[0].nValue = 90*CENT;
+    t.vout[0].txInfo = test_info_pool[0];
     CKey key;
     key.MakeNewKey(true);
     t.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
@@ -363,7 +362,7 @@ BOOST_AUTO_TEST_CASE(test_IsStandard)
     //t.vout[0].nValue = 501; // dust
     //BOOST_CHECK(!IsStandardTx(t, reason));
 
-    t.vout[0].nValue = 601; // not dust
+    t.vout[0].txInfo = test_info_pool[2]; // not dust
     BOOST_CHECK(IsStandardTx(t, reason));
 
     t.vout[0].scriptPubKey = CScript() << OP_1;

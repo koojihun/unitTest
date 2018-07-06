@@ -18,6 +18,8 @@
 
 using namespace std;
 
+extern vector<CTxInfo> test_info_pool;
+
 // Helpers:
 static std::vector<unsigned char>
 Serialize(const CScript& s)
@@ -40,7 +42,8 @@ Verify(const CScript& scriptSig, const CScript& scriptPubKey, bool fStrict)
     txTo.vin[0].prevout.n = 0;
     txTo.vin[0].prevout.hash = txFrom.GetHash();
     txTo.vin[0].scriptSig = scriptSig;
-    txTo.vout[0].nValue = 1;
+
+	txTo.vout[0].txInfo = test_info_pool[1];
 
     return VerifyScript(scriptSig, scriptPubKey, fStrict ? SCRIPT_VERIFY_P2SH : SCRIPT_VERIFY_NONE, SignatureChecker(txTo, 0));
 }
@@ -84,9 +87,9 @@ BOOST_AUTO_TEST_CASE(sign)
     for (int i = 0; i < 4; i++)
     {
         txFrom.vout[i].scriptPubKey = evalScripts[i];
-        txFrom.vout[i].nValue = COIN;
+        txFrom.vout[i].txInfo = test_info_pool[i];
         txFrom.vout[i+4].scriptPubKey = standardScripts[i];
-        txFrom.vout[i+4].nValue = COIN;
+        txFrom.vout[i+4].txInfo = test_info_pool[i + 4];
     }
     BOOST_CHECK(IsStandardTx(txFrom, reason));
 
@@ -97,7 +100,7 @@ BOOST_AUTO_TEST_CASE(sign)
         txTo[i].vout.resize(1);
         txTo[i].vin[0].prevout.n = i;
         txTo[i].vin[0].prevout.hash = txFrom.GetHash();
-        txTo[i].vout[0].nValue = 1;
+        txTo[i].vout[0].txInfo = test_info_pool[i];
 #ifdef ENABLE_WALLET
         BOOST_CHECK_MESSAGE(IsMine(keystore, txFrom.vout[i].scriptPubKey), strprintf("IsMine %d", i));
 #endif
@@ -179,7 +182,7 @@ BOOST_AUTO_TEST_CASE(set)
     for (int i = 0; i < 4; i++)
     {
         txFrom.vout[i].scriptPubKey = outer[i];
-        txFrom.vout[i].nValue = CENT;
+		txFrom.vout[i].txInfo = test_info_pool[i];
     }
     BOOST_CHECK(IsStandardTx(txFrom, reason));
 
@@ -190,7 +193,7 @@ BOOST_AUTO_TEST_CASE(set)
         txTo[i].vout.resize(1);
         txTo[i].vin[0].prevout.n = i;
         txTo[i].vin[0].prevout.hash = txFrom.GetHash();
-        txTo[i].vout[0].nValue = 1*CENT;
+        txTo[i].vout[0].txInfo = test_info_pool[i];
         txTo[i].vout[0].scriptPubKey = inner[i];
 #ifdef ENABLE_WALLET
         BOOST_CHECK_MESSAGE(IsMine(keystore, txFrom.vout[i].scriptPubKey), strprintf("IsMine %d", i));
@@ -276,11 +279,11 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
     CScript pay1of3 = GetScriptForMultisig(1, keys);
 
     txFrom.vout[0].scriptPubKey = GetScriptForDestination(CScriptID(pay1)); // P2SH (OP_CHECKSIG)
-    txFrom.vout[0].nValue = 1000;
+    txFrom.vout[0].txInfo = test_info_pool[0];
     txFrom.vout[1].scriptPubKey = pay1; // ordinary OP_CHECKSIG
-    txFrom.vout[1].nValue = 2000;
+    txFrom.vout[1].txInfo = test_info_pool[1];
     txFrom.vout[2].scriptPubKey = pay1of3; // ordinary OP_CHECKMULTISIG
-    txFrom.vout[2].nValue = 3000;
+    txFrom.vout[2].txInfo = test_info_pool[2];
 
     // vout[3] is complicated 1-of-3 AND 2-of-3
     // ... that is OK if wrapped in P2SH:
@@ -291,7 +294,7 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
     oneAndTwo << OP_3 << OP_CHECKMULTISIG;
     keystore.AddCScript(oneAndTwo);
     txFrom.vout[3].scriptPubKey = GetScriptForDestination(CScriptID(oneAndTwo));
-    txFrom.vout[3].nValue = 4000;
+    txFrom.vout[3].txInfo = test_info_pool[3];
 
     // vout[4] is max sigops:
     CScript fifteenSigops; fifteenSigops << OP_1;
@@ -300,17 +303,17 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
     fifteenSigops << OP_15 << OP_CHECKMULTISIG;
     keystore.AddCScript(fifteenSigops);
     txFrom.vout[4].scriptPubKey = GetScriptForDestination(CScriptID(fifteenSigops));
-    txFrom.vout[4].nValue = 5000;
+    txFrom.vout[4].txInfo = test_info_pool[4];
 
     // vout[5/6] are non-standard because they exceed MAX_P2SH_SIGOPS
     CScript sixteenSigops; sixteenSigops << OP_16 << OP_CHECKMULTISIG;
     keystore.AddCScript(sixteenSigops);
     txFrom.vout[5].scriptPubKey = GetScriptForDestination(CScriptID(fifteenSigops));
-    txFrom.vout[5].nValue = 5000;
+    txFrom.vout[5].txInfo = test_info_pool[5];
     CScript twentySigops; twentySigops << OP_CHECKMULTISIG;
     keystore.AddCScript(twentySigops);
     txFrom.vout[6].scriptPubKey = GetScriptForDestination(CScriptID(twentySigops));
-    txFrom.vout[6].nValue = 6000;
+    txFrom.vout[6].txInfo = test_info_pool[6];
 
     coins.ModifyCoins(txFrom.GetHash())->FromTx(txFrom, 0);
 
@@ -349,7 +352,7 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
     CMutableTransaction txToNonStd1;
     txToNonStd1.vout.resize(1);
     txToNonStd1.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetID());
-    txToNonStd1.vout[0].nValue = 1000;
+    txToNonStd1.vout[0].txInfo = test_info_pool[1];
     txToNonStd1.vin.resize(1);
     txToNonStd1.vin[0].prevout.n = 5;
     txToNonStd1.vin[0].prevout.hash = txFrom.GetHash();
@@ -361,7 +364,7 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
     CMutableTransaction txToNonStd2;
     txToNonStd2.vout.resize(1);
     txToNonStd2.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetID());
-    txToNonStd2.vout[0].nValue = 1000;
+    txToNonStd2.vout[0].txInfo = test_info_pool[0];
     txToNonStd2.vin.resize(1);
     txToNonStd2.vin[0].prevout.n = 6;
     txToNonStd2.vin[0].prevout.hash = txFrom.GetHash();

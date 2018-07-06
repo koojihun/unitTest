@@ -17,6 +17,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>
+#include <vector>
+
+std::vector<CTxInfo> test_info_pool;
 
 CClientUIInterface uiInterface;
 CWallet* pWalletMain;
@@ -30,6 +33,10 @@ struct TestingSetup {
     boost::thread_group threadGroup;
 
     TestingSetup() {
+		for (int cnt = 0; cnt < 100; cnt++) {
+			CTxInfo tmp(cnt + 1, cnt + 1, cnt + 1);
+			test_info_pool.push_back(tmp);
+		}
         fPrintToDebugLog = false; // don't want to write to debug.log file
         SelectParams(CBaseChainParams::UNITTEST);
         noui_connect();
