@@ -32,9 +32,6 @@ struct TestingSetup {
     boost::filesystem::path pathTemp;
     boost::thread_group threadGroup;
 
-	CBlockTreeDB* pblocktree;
-	CCoinsViewCache* pcoinsTip;
-
     TestingSetup() {
 		for (int cnt = 0; cnt < 100; cnt++) {
 			CTxInfo tmp(cnt + 1, cnt + 1, cnt + 1);
@@ -46,13 +43,18 @@ struct TestingSetup {
 #ifdef ENABLE_WALLET
         bitdb.MakeMock();
 #endif
+		////////////////////////////////////////////////////////////////////////////////////////
         pathTemp = GetTempPath() / strprintf("test_bitcoin_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
+		std::cout << "1";
         boost::filesystem::create_directories(pathTemp);
+		std::cout << "1";
         mapArgs["-datadir"] = pathTemp.string();
-		pblocktree = new CBlockTreeDB(1 << 20, true);
+		std::cout << "1";
         pcoinsdbview = new CCoinsViewDB(1 << 23, true);
-		pcoinsTip = new CCoinsViewCache(pcoinsdbview);
+		std::cout << "1";
         InitBlockIndex();
+		std::cout << "1";
+		////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_WALLET
         bool fFirstRun;
         pWalletMain = new CWallet("wallet.dat");
@@ -73,9 +75,7 @@ struct TestingSetup {
         delete pWalletMain;
         pWalletMain = NULL;
 #endif
-        delete pcoinsTip;
         delete pcoinsdbview;
-        delete pblocktree;
 #ifdef ENABLE_WALLET
         bitdb.Flush(true);
 #endif
